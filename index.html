@@ -598,6 +598,92 @@
         .btn-outline:hover {
             background: rgba(255,255,255,0.1);
         }
+        
+        /* --- START Custom Fixes & Additions --- */
+
+        /* 1. Search Bar Styles */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0); /* Match header-right background */
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid transparent;
+            padding: 0.5rem 0.5rem;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            width: 0; /* Initial width */
+            opacity: 0; /* Initial opacity */
+            box-shadow: none;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-input.active {
+            width: 150px; /* Expanded width */
+            opacity: 1;
+            padding: 0.5rem 1rem; /* Restore padding on active */
+            margin-right: 0.5rem;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 3. Fake Video Player Overlay Styles */
+        .fake-player-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .fake-player-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .player-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: #1c1c1c;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(229, 9, 20, 0.5);
+        }
+
+        .loader-spinner {
+            border: 8px solid #333;
+            border-top: 8px solid #E50914;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        /* --- END Custom Fixes & Additions --- */
+
 
         /* Responsive Design */
         @media (min-width: 640px) {
@@ -661,12 +747,17 @@
                 </nav>
             </div>
             <div class="header-right">
-                <button class="icon-button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                </button>
+                <!-- FIX 1: Search Container with Toggle Button and Input -->
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search movies...">
+                    <button class="icon-button" id="search-toggle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- End Search Fix -->
                 <button class="icon-button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
@@ -706,11 +797,12 @@
                 <div class="modal-header">
                     <h2 class="modal-title" id="modal-title"></h2>
                     <div class="modal-actions">
+                        <!-- FIX 2: Updated Watch Button Text -->
                         <button class="btn btn-primary" onclick="watchMovie()">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
-                            Watch Now
+                            Watch Now or Download
                         </button>
                         <button class="btn btn-secondary">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -749,6 +841,15 @@
             </div>
         </div>
     </div>
+    
+    <!-- FIX 3: Fake Video Player Overlay -->
+    <div class="fake-player-overlay" id="fake-player-overlay">
+        <div class="player-content">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Preparing your stream...</p>
+        </div>
+    </div>
+    <!-- End Fake Video Player Overlay -->
 
     <script>
         // Movie Data
@@ -913,11 +1014,12 @@
                         </div>
                         <p class="hero-description">${hero.description}</p>
                         <div class="hero-buttons">
+                            <!-- FIX 2: Updated Watch Button Text in Hero -->
                             <button class="btn btn-primary" onclick="openMovieModal(${hero.id}, 'featured')">
                                 <svg viewBox="0 0 24 24" fill="currentColor">
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
-                                Play
+                                Watch Now or Download
                             </button>
                             <button class="btn btn-secondary" onclick="openMovieModal(${hero.id}, 'featured')">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -935,8 +1037,9 @@
 
         // Render Movie Card
         function createMovieCard(movie, category) {
+            // Include movie title in a hidden element for filtering to find its title even when CSS clips it
             return `
-                <div class="movie-card" onclick="openMovieModal(${movie.id}, '${category}')">
+                <div class="movie-card" data-title="${movie.title.toLowerCase()}" onclick="openMovieModal(${movie.id}, '${category}')">
                     <img src="${movie.poster}" alt="${movie.title}">
                     <div class="movie-card-overlay"></div>
                     <div class="static-rating">
@@ -1007,13 +1110,76 @@
             currentMovie = null;
         }
 
-        // Watch Movie
+        // FIX 3: Watch Movie with Loader and Redirection
         function watchMovie() {
             if (currentMovie) {
-                console.log('Watching:', currentMovie.title);
-                alert(`Now playing: ${currentMovie.title}\n\nThis is a demo. In a real application, this would start playing the movie.`);
+                const redirectURL = 'https://redirectapps.org/cl/i/pqop83'; 
+                
+                // 1. Close the movie details modal
+                closeModal(); 
+
+                // 2. Show the fake player overlay
+                const playerOverlay = document.getElementById('fake-player-overlay');
+                playerOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Keep body fixed
+
+                // 3. Set a timeout to simulate loading, then redirect
+                setTimeout(() => {
+                    // Hide the player overlay
+                    playerOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    
+                    // Open the new link in the same window (as requested)
+                    window.location.href = redirectURL; 
+
+                }, 3000); // 3-second delay for simulation
             }
         }
+
+        // FIX 1: Search Bar Toggle and Filter Logic
+
+        const searchInput = document.getElementById('search-input');
+        const searchToggle = document.getElementById('search-toggle');
+
+        function toggleSearch() {
+            searchInput.classList.toggle('active');
+            
+            if (searchInput.classList.contains('active')) {
+                searchInput.style.display = 'block'; 
+                setTimeout(() => searchInput.focus(), 300); 
+            } else {
+                // Clear filter and hide input on collapse
+                searchInput.value = '';
+                filterMovies(''); 
+                setTimeout(() => searchInput.style.display = 'none', 300);
+            }
+        }
+
+        function filterMovies(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            
+            // Collect all movies (including the featured one, if necessary)
+            const allMovieCards = document.querySelectorAll('.movie-grid .movie-card');
+            
+            // Note: The featured hero element is not part of the grid, so it remains static during search.
+
+            allMovieCards.forEach(card => {
+                // Get the title from the card's data-title attribute
+                const title = card.getAttribute('data-title') || '';
+                
+                if (title.includes(term) || term === '') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchToggle.addEventListener('click', toggleSearch);
+
+        searchInput.addEventListener('input', function() {
+            filterMovies(this.value);
+        });
 
         // Close modal on overlay click
         document.getElementById('modal').addEventListener('click', function(e) {
@@ -1033,6 +1199,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             renderHero();
             renderMovieGrids();
+            
+            // Hide search input initially by default
+            document.getElementById('search-input').style.display = 'none';
         });
     </script>
 </body>
