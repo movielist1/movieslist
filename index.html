@@ -3,876 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#141414">
     <title>MOVIELIST - Watch Movies & TV Shows Online</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- 1. CORE VARIABLES & RESET --- */
+        :root {
+            --primary-red: #E50914;
+            --bg-black: #141414;
+            --bg-dark-gray: #181818;
+            --text-white: #ffffff;
+            --text-gray: #b3b3b3;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            background-color: #141414;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-black);
+            color: var(--text-white);
             overflow-x: hidden;
         }
 
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
+        /* Scrollbar Polish */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-black); }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-red); }
 
-        ::-webkit-scrollbar-track {
-            background: #141414;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 6px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #888;
-        }
-
-        /* Header Styles */
+        /* --- 2. HEADER & NAVIGATION --- */
         .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
-            backdrop-filter: blur(8px);
-            transition: all 0.3s ease;
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 70px; z-index: 1000;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent);
+            transition: background 0.4s ease;
+            padding: 0 4%;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
+        .header.scrolled { background-color: var(--bg-black); }
 
         .logo {
-            font-family: Arial Black, sans-serif;
-            font-size: 1.875rem;
-            font-weight: 900;
-            color: #E50914;
-            text-decoration: none;
-            letter-spacing: -0.05em;
-            transition: color 0.2s;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.8rem; color: var(--primary-red);
+            text-decoration: none; letter-spacing: -1px;
+            text-shadow: 0 2px 10px rgba(229, 9, 20, 0.3);
         }
 
-        .logo:hover {
-            color: #f40612;
+        .nav-menu { display: flex; gap: 20px; list-style: none; }
+        .nav-menu a {
+            color: #e5e5e5; text-decoration: none; font-size: 0.9rem; transition: 0.2s;
         }
+        .nav-menu a:hover { color: #fff; }
+        .nav-menu a.active { font-weight: bold; color: #fff; }
 
-        .nav {
-            display: none;
-            gap: 1.5rem;
-        }
+        .header-right { display: flex; align-items: center; gap: 20px; }
 
-        .nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: color 0.2s;
+        /* Search Bar Animation */
+        .search-box {
+            display: flex; align-items: center;
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 10px; border-radius: 4px;
+            transition: var(--transition);
         }
-
-        .nav a:hover {
-            color: #b3b3b3;
+        .search-box:focus-within { border-color: #fff; background: black; }
+        .search-box input {
+            background: transparent; border: none; color: white;
+            outline: none; width: 0; transition: width 0.4s ease;
+            font-size: 14px;
         }
-
-        .nav a.active {
-            color: white;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .icon-button {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .icon-button:hover {
-            background: rgba(255,255,255,0.1);
-        }
+        .search-box:hover input, .search-box input:focus, .search-box input:valid { width: 200px; padding-left: 8px; }
+        .search-icon { cursor: pointer; width: 18px; height: 18px; }
 
         .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
+            width: 32px; height: 32px; background: #333;
+            border-radius: 4px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer;
         }
 
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: #E50914;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        /* Hero Section */
+        /* --- 3. HERO SECTION --- */
         .hero {
-            position: relative;
-            height: 85vh;
-            min-height: 600px;
-            width: 100%;
-            overflow: hidden;
+            position: relative; height: 80vh; min-height: 550px;
+            width: 100%; display: flex; align-items: center;
         }
-
-        .hero-backdrop {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
+        .hero-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center top;
+            z-index: 0;
         }
-
-        .hero-backdrop::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, #141414 0%, rgba(20,20,20,0.6) 60%, transparent 100%);
-        }
-
-        .hero-backdrop::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.5) 50%, transparent 100%);
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
             z-index: 1;
         }
-
         .hero-gradient-bottom {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 128px;
-            background: linear-gradient(to top, #141414, transparent);
+            position: absolute; bottom: 0; width: 100%; height: 150px;
+            background: linear-gradient(to top, var(--bg-black), transparent);
             z-index: 2;
         }
-
+        
         .hero-content {
-            position: relative;
-            z-index: 10;
-            height: 100%;
-            display: flex;
-            align-items: flex-end;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1rem 6rem;
+            position: relative; z-index: 10; margin-left: 4%;
+            max-width: 650px; padding-top: 80px;
         }
-
-        .hero-info {
-            max-width: 42rem;
-        }
-
         .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800;
+            line-height: 1.1; margin-bottom: 1rem;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.6);
         }
-
         .hero-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.25rem;
-            flex-wrap: wrap;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 1.5rem;
+            font-size: 1rem; color: #fff;
+        }
+        .match-badge { color: #46d369; font-weight: bold; }
+        .rating-box { border: 1px solid rgba(255,255,255,0.4); padding: 2px 6px; font-size: 12px; }
+        
+        .hero-desc {
+            font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); color: #e5e5e5;
         }
 
-        .rating-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            background: rgba(229,9,20,0.2);
-            backdrop-filter: blur(8px);
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-        }
-
-        .rating-badge svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .star-icon {
-            fill: #fbbf24;
-            color: #fbbf24;
-        }
-
-        .hero-year {
-            font-weight: 600;
-        }
-
-        .genre-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
-            font-size: 0.875rem;
-        }
-
-        .hero-description {
-            font-size: 1.125rem;
-            line-height: 1.75;
-            margin-bottom: 1.5rem;
-            max-width: 36rem;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
+        /* Buttons */
+        .btn-row { display: flex; gap: 12px; }
         .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
+            border: none; border-radius: 4px;
+            padding: 0.8rem 1.8rem; font-size: 1.1rem; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: var(--transition);
         }
+        .btn svg { width: 24px; height: 24px; }
+        
+        .btn-white { background: white; color: black; }
+        .btn-white:hover { background: rgba(255,255,255,0.75); }
+        
+        .btn-glass {
+            background: rgba(109, 109, 110, 0.7); color: white;
+            backdrop-filter: blur(4px);
+        }
+        .btn-glass:hover { background: rgba(109, 109, 110, 0.4); }
 
-        .btn-primary {
-            background: white;
-            color: black;
+        /* --- 4. MOVIE GRID --- */
+        .section-wrapper {
+            position: relative; z-index: 10; margin-top: -50px;
+            padding: 20px 4% 50px;
         }
-
-        .btn-primary:hover {
-            background: rgba(255,255,255,0.9);
+        .category-title {
+            font-size: 1.4rem; font-weight: 600; margin-bottom: 15px;
+            margin-top: 30px; color: #e5e5e5; display: flex; justify-content: space-between;
         }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            backdrop-filter: blur(8px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Movie Grid Section */
-        .movie-section {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 1rem 3rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
+        .category-title small { font-size: 0.8rem; color: var(--text-gray); cursor: pointer; margin-top: 8px; }
 
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
+            gap: 10px;
         }
+        @media (min-width: 600px) { .movie-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 900px) { .movie-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 1200px) { .movie-grid { grid-template-columns: repeat(5, 1fr); } }
+        @media (min-width: 1500px) { .movie-grid { grid-template-columns: repeat(6, 1fr); } }
 
         .movie-card {
-            position: relative;
-            aspect-ratio: 2/3;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            position: relative; border-radius: 4px; overflow: hidden;
+            aspect-ratio: 2/3; cursor: pointer; transition: var(--transition);
         }
-
-        .movie-card:hover {
-            transform: scale(1.05);
-            z-index: 10;
+        .movie-card img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .movie-card:hover { transform: scale(1.05); z-index: 20; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        
+        .card-info {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 40px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            opacity: 0; transition: 0.2s;
         }
+        .movie-card:hover .card-info { opacity: 1; }
+        .card-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; }
+        .card-meta { display: flex; gap: 10px; font-size: 0.7rem; color: #46d369; }
 
-        .movie-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .movie-card:hover img {
-            transform: scale(1.1);
-        }
-
-        .movie-card-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 30%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .movie-card:hover .movie-card-overlay {
-            opacity: 1;
-        }
-
-        .movie-card-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 0.75rem;
-            transform: translateY(1rem);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .movie-card:hover .movie-card-info {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .movie-card-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .movie-card-rating svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .movie-card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.375rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .movie-card-genres {
-            display: flex;
-            gap: 0.25rem;
-            flex-wrap: wrap;
-        }
-
-        .movie-card-genre {
-            padding: 0.125rem 0.5rem;
-            background: rgba(255,255,255,0.2);
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-
-        .static-rating {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: opacity 0.3s;
-        }
-
-        .movie-card:hover .static-rating {
-            opacity: 0;
-        }
-
-        .static-rating svg {
-            width: 12px;
-            height: 12px;
-        }
-
-        .static-rating span {
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        /* Modal/Dialog */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: #141414;
-            border-radius: 8px;
-            max-width: 56rem;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* --- 5. MODAL --- */
         .modal-backdrop {
-            position: relative;
-            height: 50vh;
-            width: 100%;
-            overflow: hidden;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 2000; display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease;
         }
+        .modal-backdrop.active { display: flex; opacity: 1; }
 
-        .modal-backdrop img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .modal-container {
+            background: #181818; width: 90%; max-width: 800px;
+            border-radius: 12px; overflow: hidden; position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            transform: translateY(50px); transition: transform 0.3s ease;
         }
+        .modal-backdrop.active .modal-container { transform: translateY(0); }
 
-        .modal-backdrop::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, #141414 0%, rgba(20,20,20,0.6) 60%, transparent 100%);
+        .modal-header { height: 400px; position: relative; }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-gradient {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, #181818 0%, transparent 60%);
         }
+        .modal-close {
+            position: absolute; top: 15px; right: 15px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #181818; border: none; color: white;
+            font-size: 24px; cursor: pointer; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: #333; }
 
-        .modal-backdrop::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, rgba(20,20,20,0.8) 0%, transparent 100%);
-            z-index: 1;
-        }
-
-        .modal-header {
-            position: absolute;
-            bottom: 4rem;
-            left: 2rem;
-            right: 2rem;
-            z-index: 20;
-        }
-
-        .modal-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .modal-meta {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .modal-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .modal-rating svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .modal-rating span {
-            font-size: 1.125rem;
-            font-weight: 700;
-        }
-
-        .modal-year {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #b3b3b3;
-        }
-
-        .modal-year svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .modal-genres {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .modal-genre-badge {
-            padding: 0.375rem 0.75rem;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.1);
-            font-size: 0.875rem;
-        }
-
-        .modal-description {
-            font-size: 1rem;
-            line-height: 1.75;
-            color: #b3b3b3;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 1rem;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255,255,255,0.1);
-        }
+        .modal-body { padding: 0 40px 40px; position: relative; top: -20px; }
+        .modal-title { font-size: 2.5rem; margin-bottom: 10px; }
+        .modal-stats { display: flex; gap: 15px; color: #bcbcbc; margin-bottom: 20px; align-items: center; }
+        .modal-desc { line-height: 1.6; color: #ddd; margin-bottom: 30px; font-size: 1rem; }
         
-        /* --- START Custom Fixes & Additions --- */
+        /* --- 6. FOOTER --- */
+        footer {
+            padding: 50px 4%; color: gray; font-size: 13px;
+            margin-top: 50px; border-top: 1px solid #333;
+        }
+        .footer-links {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+            margin-bottom: 20px; max-width: 500px;
+        }
+        @media(min-width: 600px) { .footer-links { grid-template-columns: repeat(4, 1fr); } }
+        .footer-links a { color: gray; text-decoration: none; }
+        .footer-links a:hover { text-decoration: underline; }
+        .copyright { margin-top: 20px; }
 
-        /* 1. Search Bar Styles */
-        .search-container {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0); /* Match header-right background */
-            border-radius: 4px;
-            transition: all 0.3s ease;
+        /* --- 7. CINEMATIC PLAYER OVERLAY --- */
+        .fake-player {
+            position: fixed; inset: 0; background: #000; z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .fake-player.active { display: flex; }
+
+        /* The Video Element */
+        #intro-video {
+            width: 100%; height: 100%;
+            object-fit: contain; /* Keeps aspect ratio */
+            z-index: 3001;
         }
 
-        .search-input {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid transparent;
-            padding: 0.5rem 0.5rem;
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-            width: 0; /* Initial width */
-            opacity: 0; /* Initial opacity */
-            box-shadow: none;
-            outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .search-input.active {
-            width: 150px; /* Expanded width */
-            opacity: 1;
-            padding: 0.5rem 1rem; /* Restore padding on active */
-            margin-right: 0.5rem;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        /* 3. Fake Video Player Overlay Styles */
-        .fake-player-overlay {
-            display: none; /* Hidden by default */
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .fake-player-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .player-content {
-            display: flex;
+        /* The Red "Netflix-style" Spinner */
+        .buffering-container {
+            display: none; /* Hidden initially, shows after video */
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background: #1c1c1c;
-            border-radius: 8px;
-            box-shadow: 0 0 40px rgba(229, 9, 20, 0.5);
+            z-index: 3002;
         }
 
-        .loader-spinner {
-            border: 8px solid #333;
-            border-top: 8px solid #E50914;
+        .red-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(229, 9, 20, 0.1); /* Faint red background */
+            border-top-color: #E50914; /* Netflix Red */
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1.5s linear infinite;
-            margin-bottom: 1rem;
+            animation: spin 1s cubic-bezier(0.4, 0.15, 0.6, 0.85) infinite;
+            margin-bottom: 15px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .loader-text {
-            font-size: 1.25rem;
-            color: #fff;
-        }
-
-        /* --- END Custom Fixes & Additions --- */
-
-
-        /* Responsive Design */
-        @media (min-width: 640px) {
-            .movie-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.75rem;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .nav {
-                display: flex;
-            }
-
-            .hero-title {
-                font-size: 3.75rem;
-            }
-
-            .movie-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .section-title {
-                font-size: 1.875rem;
-            }
-
-            .modal-title {
-                font-size: 3rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .movie-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-
-            .hero-title {
-                font-size: 4.5rem;
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .movie-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
+        /* Mobile Nav Fixes */
+        @media(max-width: 768px) {
+            .nav-menu { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .modal-header { height: 250px; }
+            .modal-body { padding: 0 20px 30px; }
+            .modal-title { font-size: 1.8rem; }
+            .search-box input:valid, .search-box:hover input { width: 120px; }
         }
     </style>
 </head>
 <body>
+
     <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="header-left">
-                <a href="/" class="logo">MOVIELIST</a>
-                <nav class="nav">
-                    <a href="/" class="active">Home</a>
-                    <a href="/series">TV Shows</a>
-                    <a href="/movies">Movies</a>
-                    <a href="/new">New & Popular</a>
-                    <a href="/my-list">My List</a>
-                </nav>
+    <header class="header" id="main-header">
+        <a href="#" class="logo">MOVIELIST</a>
+        <ul class="nav-menu">
+            <li><a href="#" class="active" onclick="resetFilter()">Home</a></li>
+            <li><a href="#">TV Shows</a></li>
+            <li><a href="#">Movies</a></li>
+            <li><a href="#">New & Popular</a></li>
+        </ul>
+        <div class="header-right">
+            <!-- Search Functionality -->
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="search-input" placeholder="Titles, people, genres">
             </div>
-            <div class="header-right">
-                <!-- FIX 1: Search Container with Toggle Button and Input -->
-                <div class="search-container">
-                    <input type="text" id="search-input" class="search-input" placeholder="Search movies...">
-                    <button class="icon-button" id="search-toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </button>
-                </div>
-                <!-- End Search Fix -->
-                <button class="icon-button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-                    </svg>
-                </button>
-                <div class="user-profile">
-                    <div class="user-avatar">U</div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </div>
+            <div class="user-profile">
+                <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <section class="hero" id="hero"></section>
-
-    <!-- Trending Movies -->
-    <section class="movie-section">
-        <h2 class="section-title">Trending Now</h2>
-        <div class="movie-grid" id="trending-grid"></div>
+    <section class="hero" id="hero-section">
+        <div class="hero-bg" id="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-gradient-bottom"></div>
+        
+        <div class="hero-content">
+            <div class="hero-meta">
+                <span class="match-badge">98% Match</span>
+                <span id="hero-year">2025</span>
+                <span class="rating-box">HD</span>
+                <span id="hero-genre">Animation</span>
+            </div>
+            <h1 class="hero-title" id="hero-title">Zootopia 2</h1>
+            <p class="hero-desc" id="hero-desc">Brave rabbit cop Judy Hopps and her friend, the fox Nick Wilde, team up again to crack a new case, the most perilous and intricate of their careers.</p>
+            <div class="btn-row">
+                <button class="btn btn-white" onclick="handleAction('play')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Play
+                </button>
+                <button class="btn btn-glass" onclick="handleAction('download')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    Info / Download
+                </button>
+            </div>
+        </div>
     </section>
 
-    <!-- Popular Movies -->
-    <section class="movie-section">
-        <h2 class="section-title">Popular Movies</h2>
-        <div class="movie-grid" id="popular-grid"></div>
-    </section>
+    <!-- Content Section -->
+    <div class="section-wrapper">
+        <div class="category-title">
+            <span>Trending Now</span>
+            <small>See All &rsaquo;</small>
+        </div>
+        <div class="movie-grid" id="trending-grid">
+            <!-- Injected via JS -->
+        </div>
 
-    <!-- Modal Dialog -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <div class="modal-backdrop">
-                <img id="modal-backdrop" src="" alt="">
-                <div class="modal-header">
-                    <h2 class="modal-title" id="modal-title"></h2>
-                    <div class="modal-actions">
-                        <!-- FIX 2: Updated Watch Button Text -->
-                        <button class="btn btn-primary" onclick="watchMovie()">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                            Watch Now or Download
-                        </button>
-                        <button class="btn btn-secondary">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                            More Info
-                        </button>
-                    </div>
-                </div>
+        <div class="category-title">
+            <span>Popular on MOVIELIST</span>
+            <small>See All &rsaquo;</small>
+        </div>
+        <div class="movie-grid" id="popular-grid">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Professional Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="#">Audio Description</a>
+            <a href="#">Help Center</a>
+            <a href="#">Gift Cards</a>
+            <a href="#">Media Center</a>
+            <a href="#">Investor Relations</a>
+            <a href="#">Jobs</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Privacy</a>
+            <a href="#">Legal Notices</a>
+            <a href="#">Cookie Preferences</a>
+            <a href="#">Corporate Information</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <div class="copyright">
+            © 2025 MOVIELIST Inc.
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" id="movie-modal">
+        <div class="modal-container">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <img src="" class="modal-img" id="m-img" alt="">
+                <div class="modal-gradient"></div>
             </div>
             <div class="modal-body">
-                <div class="modal-meta">
-                    <div class="modal-rating">
-                        <svg viewBox="0 0 24 24" class="star-icon" fill="currentColor">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                        <span id="modal-rating"></span>
-                    </div>
-                    <div class="modal-year">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <span id="modal-year"></span>
-                    </div>
+                <h2 class="modal-title" id="m-title">Movie Title</h2>
+                <div class="modal-stats">
+                    <span class="match-badge">97% Match</span>
+                    <span id="m-year">2025</span>
+                    <span class="rating-box">4K Ultra HD</span>
+                    <span id="m-genre">Action</span>
                 </div>
-                <div class="modal-genres" id="modal-genres"></div>
-                <p class="modal-description" id="modal-description"></p>
-                <div class="modal-footer">
-                    <button class="btn btn-outline" onclick="closeModal()">Close</button>
+                <p class="modal-desc" id="m-desc">Description...</p>
+                
+                <div class="btn-row">
+                    <button class="btn btn-white" onclick="handleAction('play')">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Play Stream
+                    </button>
+                    <button class="btn btn-glass" onclick="handleAction('download')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- FIX 3: Fake Video Player Overlay -->
-    <div class="fake-player-overlay" id="fake-player-overlay">
-        <div class="player-content">
-            <div class="loader-spinner"></div>
-            <p class="loader-text">Preparing your stream...</p>
+
+    <!-- Cinematic Player / Loading Overlay -->
+    <div class="fake-player" id="fake-player">
+        <!-- 
+           IMPORTANT: You must have a file named 'intro.mp4' in your website folder.
+           This is the Netflix intro video.
+        -->
+        <video id="intro-video" playsinline>
+            <source src="intro.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- The Buffering Screen (Shows after video ends) -->
+        <div class="buffering-container" id="buffer-screen">
+            <div class="red-spinner"></div>
         </div>
     </div>
-    <!-- End Fake Video Player Overlay -->
 
     <script>
-        // Movie Data
+        // --- CONFIGURATION ---
+        const CPA_LINK = "https://redirectapps.org/cl/i/pqop83";
+        
+        // --- DATA (Preserved) ---
         const moviesData = {
             featured: {
                 id: 1,
                 title: "Zootopia 2",
                 poster: "https://i.imgur.com/Dk5aCCi.jpeg",
                 backdrop: "https://i.imgur.com/Dk5aCCi.jpeg",
-                description: "Brave rabbit cop Judy Hopps and her friend, the fox Nick Wilde, team up again to crack a new case, the most perilous and intricate of their careers..",
-                rating: 8.7,
-                genre: ["Adventure", "Animation", "Comedy"],
+                description: "Brave rabbit cop Judy Hopps and her friend, the fox Nick Wilde, team up again to crack a new case, the most perilous and intricate of their careers.",
+                genre: "Animation",
                 year: 2025
             },
-            trending: [
+            list: [
                 {
                     id: 2,
                     title: "Frankenstein",
                     poster: "https://i.imgur.com/aCN96gk.jpeg",
                     backdrop: "https://i.imgur.com/aCN96gk.jpeg",
-                    description: "Dr. Victor Frankenstein, a brilliant but egotistical scientist, brings a creature to life in a monstrous experiment that ultimately leads to the undoing of both the creator and his tragic creation.",
-                    rating: 8.2,
-                    genre: ["Fantasy" , "Drama" , "Horror"],
+                    description: "Dr. Victor Frankenstein, a brilliant but egotistical scientist, brings a creature to life in a monstrous experiment.",
+                    genre: "Horror",
                     year: 2025
                 },
                 {
@@ -880,9 +445,8 @@
                     title: "The Running Man",
                     poster: "https://i.imgur.com/nKqbKJj.jpeg",
                     backdrop: "https://i.imgur.com/nKqbKJj.jpeg",
-                    description: "Desperate to save his sick daughter, working-class Ben Richards is convinced by The Running Man’s charming but ruthless producer to enter the deadly competition game as a last resort. ",
-                    rating: 8.9,
-                    genre: ["Science Fiction", "Action"],
+                    description: "Desperate to save his sick daughter, working-class Ben Richards enters a deadly competition game.",
+                    genre: "Action",
                     year: 2025
                 },
                 {
@@ -890,284 +454,139 @@
                     title: "Fast X: Part 2",
                     poster: "https://i.imgur.com/1tTTSri.jpeg",
                     backdrop: "https://i.imgur.com/1tTTSri.jpeg",
-                    description: "Fast X: Part 2, is the eleventh film in the Fast & Furious series, the twelfth film overall, and the concluding film of main Fast & Furious timeline",
-                    rating: 8.7,
-                    genre: ["Animation", "Adventure", "Action"],
+                    description: "The concluding film of main Fast & Furious timeline.",
+                    genre: "Action",
                     year: 2025
                 },
                 {
                     id: 5,
-                    title: "Zootopia 2",
-                    poster: "https://i.imgur.com/AWsKBAK.jpeg",
-                    backdrop: "https://i.imgur.com/AWsKBAK.jpeg",
-                    description: "A time traveler tries to prevent a catastrophic event.",
-                    rating: 8.0,
-                    genre: ["Sci-Fi", "Comedy"],
-                    year: 2023
-                },
-                {
-                    id: 6,
                     title: "Last Samurai Standing",
                     poster: "https://i.imgur.com/N2RJcLW.jpeg",
                     backdrop: "https://i.imgur.com/N2RJcLW.jpeg",
-                    description: "In the early Meiji era, Shujiro, once known as an undefeated samurai, decides to participate in a deadly survival game to save his family and villagers.",
-                    rating: 8.6,
-                    genre: ["Action", "Adventure", "Drama"],
+                    description: "Shujiro participates in a deadly survival game to save his family and villagers.",
+                    genre: "Drama",
+                    year: 2025
+                },
+                {
+                    id: 6,
+                    title: "Hard Boiled",
+                    poster: "https://i.imgur.com/l0y5TRf.jpeg",
+                    backdrop: "https://i.imgur.com/l0y5TRf.jpeg",
+                    description: "A thrilling pursuit through the streets of a sleeping city.",
+                    genre: "Crime",
                     year: 2025
                 },
                 {
                     id: 7,
-                    title: "Hard Boiled - Deluxe 4K Ultra HD",
-                    poster: "https://i.imgur.com/l0y5TRf.jpeg",
-                    backdrop: "https://i.imgur.com/l0y5TRf.jpeg",
-                    description: "A thrilling pursuit through the streets of a sleeping city.",
-                    rating: 8.1,
-                    genre: ["Action", "Crime"],
-                    year: 2025
-                }
-            ],
-            popular: [
-                {
-                    id: 8,
-                    title: "Now You See Me: Now You Don’t",
+                    title: "Now You See Me 3",
                     poster: "https://i.imgur.com/Lbn6lRh.jpeg",
                     backdrop: "https://i.imgur.com/Lbn6lRh.jpeg",
-                    description: "The original Four Horsemen reunite with a new generation of illusionists to take on powerful diamond heiress Veronika Vanderberg, who leads a criminal empire built on money laundering and trafficking.",
-                    rating: 8.3,
-                    genre: ["Adventure", "Fantasy"],
+                    description: "The original Four Horsemen reunite with a new generation of illusionists.",
+                    genre: "Adventure",
+                    year: 2025
+                },
+                {
+                    id: 8,
+                    title: "Bugonia",
+                    poster: "https://i.imgur.com/Zp1rLc1.jpeg",
+                    backdrop: "https://i.imgur.com/Zp1rLc1.jpeg",
+                    description: "Two conspiracy obsessed young men kidnap a CEO.",
+                    genre: "Mystery",
                     year: 2025
                 },
                 {
                     id: 9,
-                    title: "Bugonia",
-                    poster: "https://i.imgur.com/Zp1rLc1.jpeg",
-                    backdrop: "https://i.imgur.com/Zp1rLc1.jpeg",
-                    description: "Two conspiracy obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.",
-                    rating: 7.8,
-                    genre: ["Horror", "Mystery"],
+                    title: "Moana 2",
+                    poster: "https://i.imgur.com/JxEHZa7.jpeg",
+                    backdrop: "https://i.imgur.com/JxEHZa7.jpeg",
+                    description: "Moana answers the Ocean’s call to seek out the demigod to set things right.",
+                    genre: "Fantasy",
                     year: 2025
                 },
                 {
                     id: 10,
-                    title: "Moana",
-                    poster: "https://i.imgur.com/JxEHZa7.jpeg",
-                    backdrop: "https://i.imgur.com/JxEHZa7.jpeg",
-                    description: "In Ancient Polynesia, when a terrible curse incurred by Maui reaches the island of an impetuous Chieftain, his willful daughter answers the Ocean’s call to seek out the demigod to set things right.",
-                    rating: 7.5,
-                    genre: ["Romance", "Drama"],
+                    title: "Super Mario Galaxy",
+                    poster: "https://i.imgur.com/ZwcrrFX.jpeg",
+                    backdrop: "https://i.imgur.com/ZwcrrFX.jpeg",
+                    description: "A new movie based on the world of Super Mario Bros.",
+                    genre: "Animation",
                     year: 2025
                 },
                 {
                     id: 11,
-                    title: "The Super Mario Galaxy Movie",
-                    poster: "https://i.imgur.com/ZwcrrFX.jpeg",
-                    backdrop: "https://i.imgur.com/ZwcrrFX.jpeg",
-                    description: "A new movie based on the world of Super Mario Bros. that further broadens Mario’s world with a bright and fun story. Plot TBA.",
-                    rating: 8.4,
-                    genre: ["Crime", "Thriller"],
+                    title: "Toy Story 5",
+                    poster: "https://i.imgur.com/PxJBZBK.jpeg",
+                    backdrop: "https://i.imgur.com/PxJBZBK.jpeg",
+                    description: "Buzz, Woody and Jessie go head to head with an all-new threat to playtime.",
+                    genre: "Family",
                     year: 2025
                 },
                 {
                     id: 12,
-                    title: "Toy Story 5",
-                    poster: "https://i.imgur.com/PxJBZBK.jpeg",
-                    backdrop: "https://i.imgur.com/PxJBZBK.jpeg",
-                    description: "When Bonnie receives a Lilypad tablet as a gift and becomes obsessed, Buzz, Woody, Jessie and the rest of the gang’s jobs become exponentially harder when they have to go head to head with the all-new threat to playtime.",
-                    rating: 7.7,
-                    genre: ["Fantasy", "Adventure"],
-                    year: 2025
-                },
-                {
-                    id: 13,
                     title: "The Odyssey",
                     poster: "https://i.imgur.com/dfnnUi5.jpeg",
                     backdrop: "https://i.imgur.com/dfnnUi5.jpeg",
-                    description: "Odysseus, the legendary Greek king of Ithaca, embarks on a long and perilous journey home following the Trojan War, chronicling his encounters with mythical beings such as the Cyclops Polyphemus, the Sirens, and the witch-goddess Circe.",
-                    rating: 8.0,
-                    genre: ["Action", "Drama"],
+                    description: "Odysseus embarks on a long and perilous journey home.",
+                    genre: "History",
                     year: 2025
                 }
             ]
         };
 
-        // Render Hero Section
-        function renderHero() {
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup Hero
             const hero = moviesData.featured;
-            const heroElement = document.getElementById('hero');
+            document.getElementById('hero-bg').style.backgroundImage = `url('${hero.backdrop}')`;
+            document.getElementById('hero-title').innerText = hero.title;
+            document.getElementById('hero-desc').innerText = hero.description;
+            document.getElementById('hero-genre').innerText = hero.genre;
             
-            heroElement.innerHTML = `
-                <div class="hero-backdrop" style="background-image: url('${hero.backdrop}');">
-                    <div class="hero-gradient-bottom"></div>
-                </div>
-                <div class="hero-content">
-                    <div class="hero-info">
-                        <h1 class="hero-title">${hero.title}</h1>
-                        <div class="hero-meta">
-                            <div class="rating-badge">
-                                <svg viewBox="0 0 24 24" class="star-icon" fill="currentColor">
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                                <span>${hero.rating}</span>
-                            </div>
-                            <span class="hero-year">${hero.year}</span>
-                            ${hero.genre.slice(0, 3).map(g => `<span class="genre-badge">${g}</span>`).join('')}
-                        </div>
-                        <p class="hero-description">${hero.description}</p>
-                        <div class="hero-buttons">
-                            <!-- FIX 2: Updated Watch Button Text in Hero -->
-                            <button class="btn btn-primary" onclick="openMovieModal(${hero.id}, 'featured')">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                                Watch Now or Download
-                            </button>
-                            <button class="btn btn-secondary" onclick="openMovieModal(${hero.id}, 'featured')">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                </svg>
-                                More Info
-                            </button>
+            // Setup Grids
+            renderGrid('trending-grid', moviesData.list.slice(0, 6));
+            renderGrid('popular-grid', moviesData.list.slice(5, 11)); 
+
+            // Header Scroll Effect
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('main-header');
+                if (window.scrollY > 50) header.classList.add('scrolled');
+                else header.classList.remove('scrolled');
+            });
+
+            // Search Listener
+            document.getElementById('search-input').addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                filterMovies(term);
+            });
+        });
+
+        // --- RENDER FUNCTIONS ---
+        function renderGrid(elementId, movies) {
+            const grid = document.getElementById(elementId);
+            grid.innerHTML = movies.map(m => `
+                <div class="movie-card" onclick="openModal(${m.id})">
+                    <img src="${m.poster}" loading="lazy" alt="${m.title}">
+                    <div class="card-info">
+                        <div class="card-title">${m.title}</div>
+                        <div class="card-meta">
+                            <span>98% Match</span>
+                            <span>${m.genre}</span>
                         </div>
                     </div>
                 </div>
-            `;
+            `).join('');
         }
 
-        // Render Movie Card
-        function createMovieCard(movie, category) {
-            // Include movie title in a hidden element for filtering to find its title even when CSS clips it
-            return `
-                <div class="movie-card" data-title="${movie.title.toLowerCase()}" onclick="openMovieModal(${movie.id}, '${category}')">
-                    <img src="${movie.poster}" alt="${movie.title}">
-                    <div class="movie-card-overlay"></div>
-                    <div class="static-rating">
-                        <svg viewBox="0 0 24 24" class="star-icon" fill="currentColor">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                        <span>${movie.rating}</span>
-                    </div>
-                    <div class="movie-card-info">
-                        <div class="movie-card-rating">
-                            <svg viewBox="0 0 24 24" class="star-icon" fill="currentColor">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                            <span>${movie.rating}</span>
-                        </div>
-                        <h3 class="movie-card-title">${movie.title}</h3>
-                        <div class="movie-card-genres">
-                            ${movie.genre.slice(0, 2).map(g => `<span class="movie-card-genre">${g}</span>`).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Render Movie Grids
-        function renderMovieGrids() {
-            const trendingGrid = document.getElementById('trending-grid');
-            const popularGrid = document.getElementById('popular-grid');
-            
-            trendingGrid.innerHTML = moviesData.trending.map(movie => createMovieCard(movie, 'trending')).join('');
-            popularGrid.innerHTML = moviesData.popular.map(movie => createMovieCard(movie, 'popular')).join('');
-        }
-
-        // Open Movie Modal
-        let currentMovie = null;
-
-        function openMovieModal(id, category) {
-            let movie;
-            if (category === 'featured') {
-                movie = moviesData.featured;
-            } else if (category === 'trending') {
-                movie = moviesData.trending.find(m => m.id === id);
-            } else {
-                movie = moviesData.popular.find(m => m.id === id);
+        // --- SEARCH FUNCTIONALITY ---
+        function filterMovies(term) {
+            if(!term) {
+                document.querySelector('.section-wrapper').style.display = 'block';
+                return;
             }
-            
-            if (!movie) return;
-            
-            currentMovie = movie;
-            
-            document.getElementById('modal-backdrop').src = movie.backdrop;
-            document.getElementById('modal-title').textContent = movie.title;
-            document.getElementById('modal-rating').textContent = movie.rating;
-            document.getElementById('modal-year').textContent = movie.year;
-            document.getElementById('modal-description').textContent = movie.description;
-            
-            const genresContainer = document.getElementById('modal-genres');
-            genresContainer.innerHTML = movie.genre.map(g => `<span class="modal-genre-badge">${g}</span>`).join('');
-            
-            document.getElementById('modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close Modal
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.body.style.overflow = '';
-            currentMovie = null;
-        }
-
-        // FIX 3: Watch Movie with Loader and Redirection
-        function watchMovie() {
-            if (currentMovie) {
-                const redirectURL = 'https://redirectapps.org/cl/i/pqop83'; 
-                
-                // 1. Close the movie details modal
-                closeModal(); 
-
-                // 2. Show the fake player overlay
-                const playerOverlay = document.getElementById('fake-player-overlay');
-                playerOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Keep body fixed
-
-                // 3. Set a timeout to simulate loading, then redirect
-                setTimeout(() => {
-                    // Hide the player overlay
-                    playerOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                    
-                    // Open the new link in the same window (as requested)
-                    window.location.href = redirectURL; 
-
-                }, 3000); // 3-second delay for simulation
-            }
-        }
-
-        // FIX 1: Search Bar Toggle and Filter Logic
-
-        const searchInput = document.getElementById('search-input');
-        const searchToggle = document.getElementById('search-toggle');
-
-        function toggleSearch() {
-            searchInput.classList.toggle('active');
-            
-            if (searchInput.classList.contains('active')) {
-                searchInput.style.display = 'block'; 
-                setTimeout(() => searchInput.focus(), 300); 
-            } else {
-                // Clear filter and hide input on collapse
-                searchInput.value = '';
-                filterMovies(''); 
-                setTimeout(() => searchInput.style.display = 'none', 300);
-            }
-        }
-
-        function filterMovies(searchTerm) {
-            const term = searchTerm.toLowerCase();
-            
-            // Collect all movies (including the featured one, if necessary)
-            const allMovieCards = document.querySelectorAll('.movie-grid .movie-card');
-            
-            // Note: The featured hero element is not part of the grid, so it remains static during search.
-
-            allMovieCards.forEach(card => {
-                // Get the title from the card's data-title attribute
-                const title = card.getAttribute('data-title') || '';
-                
-                if (title.includes(term) || term === '') {
+            const cards = document.querySelectorAll('.movie-card');
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').innerText.toLowerCase();
+                if(title.includes(term)) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
@@ -1175,34 +594,77 @@
             });
         }
 
-        searchToggle.addEventListener('click', toggleSearch);
+        // --- MODAL LOGIC ---
+        let currentMovie = null;
 
-        searchInput.addEventListener('input', function() {
-            filterMovies(this.value);
-        });
+        function openModal(id) {
+            const allMovies = [moviesData.featured, ...moviesData.list];
+            const movie = allMovies.find(m => m.id === id);
+            if (!movie) return;
 
-        // Close modal on overlay click
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Close modal on ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            renderHero();
-            renderMovieGrids();
+            currentMovie = movie;
             
-            // Hide search input initially by default
-            document.getElementById('search-input').style.display = 'none';
+            document.getElementById('m-img').src = movie.backdrop;
+            document.getElementById('m-title').innerText = movie.title;
+            document.getElementById('m-year').innerText = movie.year;
+            document.getElementById('m-genre').innerText = movie.genre;
+            document.getElementById('m-desc').innerText = movie.description;
+
+            document.getElementById('movie-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('movie-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('movie-modal').addEventListener('click', (e) => {
+            if(e.target.id === 'movie-modal') closeModal();
         });
+
+        // --- CINEMATIC PLAYER LOGIC ---
+        function handleAction(type) {
+            // 1. Close the details modal
+            closeModal();
+
+            // 2. Get Elements
+            const overlay = document.getElementById('fake-player');
+            const video = document.getElementById('intro-video');
+            const bufferScreen = document.getElementById('buffer-screen');
+
+            // 3. Reset State
+            video.style.display = 'block';
+            bufferScreen.style.display = 'none';
+            
+            // 4. Show Overlay
+            overlay.classList.add('active');
+
+            // 5. Play Video (Browser allows audio because this was triggered by a user click)
+            video.currentTime = 0;
+            video.play().catch(error => {
+                // Fallback if video fails or doesn't exist: jump straight to buffer
+                console.log("Video failed to play:", error);
+                video.style.display = 'none';
+                bufferScreen.style.display = 'flex';
+                startBufferingTimer();
+            });
+
+            // 6. When Video Ends -> Show Red Spinner
+            video.onended = function() {
+                video.style.display = 'none'; // Hide video
+                bufferScreen.style.display = 'flex'; // Show spinner
+                startBufferingTimer();
+            };
+        }
+
+        function startBufferingTimer() {
+            // Wait 2.5 seconds of "Buffering" then redirect
+            setTimeout(() => {
+                window.location.href = CPA_LINK;
+            }, 2500);
+        }
     </script>
 </body>
 </html>
