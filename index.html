@@ -234,6 +234,7 @@
         .fake-player {
             position: fixed; inset: 0; background: #000; z-index: 3000;
             display: none; align-items: center; justify-content: center;
+            flex-direction: column;
         }
         .fake-player.active { display: flex; }
 
@@ -242,14 +243,19 @@
             width: 100%; height: 100%;
             object-fit: contain; /* Keeps aspect ratio */
             z-index: 3001;
+            background: black;
         }
 
         /* The Red "Netflix-style" Spinner */
         .buffering-container {
-            display: none; /* Hidden initially, shows after video */
+            display: none; /* Hidden initially, shows after video or if video fails */
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            position: absolute;
+            inset: 0;
             z-index: 3002;
+            background: black;
         }
 
         .red-spinner {
@@ -259,7 +265,12 @@
             border-top-color: #E50914; /* Netflix Red */
             border-radius: 50%;
             animation: spin 1s cubic-bezier(0.4, 0.15, 0.6, 0.85) infinite;
-            margin-bottom: 15px;
+        }
+        
+        /* Optional loading text */
+        .buffer-text {
+            color: #fff; margin-top: 15px; font-family: sans-serif;
+            font-size: 14px; opacity: 0.7;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -400,18 +411,16 @@
 
     <!-- Cinematic Player / Loading Overlay -->
     <div class="fake-player" id="fake-player">
-        <!-- 
-           IMPORTANT: You must have a file named 'intro.mp4' in your website folder.
-           This is the Netflix intro video.
-        -->
+        <!-- Remote Video Source added so it works immediately -->
         <video id="intro-video" playsinline>
+            <source src="https://github.com/ignatiusmb/assets/raw/main/video/netflix-intro.mp4" type="video/mp4">
             <source src="intro.mp4" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
 
-        <!-- The Buffering Screen (Shows after video ends) -->
+        <!-- The Buffering Screen -->
         <div class="buffering-container" id="buffer-screen">
             <div class="red-spinner"></div>
+            <div class="buffer-text">Loading...</div>
         </div>
     </div>
 
@@ -419,7 +428,7 @@
         // --- CONFIGURATION ---
         const CPA_LINK = "https://redirectapps.org/cl/i/pqop83";
         
-        // --- DATA (Preserved) ---
+        // --- DATA ---
         const moviesData = {
             featured: {
                 id: 1,
@@ -431,136 +440,43 @@
                 year: 2025
             },
             list: [
-                {
-                    id: 2,
-                    title: "Frankenstein",
-                    poster: "https://i.imgur.com/aCN96gk.jpeg",
-                    backdrop: "https://i.imgur.com/aCN96gk.jpeg",
-                    description: "Dr. Victor Frankenstein, a brilliant but egotistical scientist, brings a creature to life in a monstrous experiment.",
-                    genre: "Horror",
-                    year: 2025
-                },
-                {
-                    id: 3,
-                    title: "The Running Man",
-                    poster: "https://i.imgur.com/nKqbKJj.jpeg",
-                    backdrop: "https://i.imgur.com/nKqbKJj.jpeg",
-                    description: "Desperate to save his sick daughter, working-class Ben Richards enters a deadly competition game.",
-                    genre: "Action",
-                    year: 2025
-                },
-                {
-                    id: 4,
-                    title: "Fast X: Part 2",
-                    poster: "https://i.imgur.com/1tTTSri.jpeg",
-                    backdrop: "https://i.imgur.com/1tTTSri.jpeg",
-                    description: "The concluding film of main Fast & Furious timeline.",
-                    genre: "Action",
-                    year: 2025
-                },
-                {
-                    id: 5,
-                    title: "Last Samurai Standing",
-                    poster: "https://i.imgur.com/N2RJcLW.jpeg",
-                    backdrop: "https://i.imgur.com/N2RJcLW.jpeg",
-                    description: "Shujiro participates in a deadly survival game to save his family and villagers.",
-                    genre: "Drama",
-                    year: 2025
-                },
-                {
-                    id: 6,
-                    title: "Hard Boiled",
-                    poster: "https://i.imgur.com/l0y5TRf.jpeg",
-                    backdrop: "https://i.imgur.com/l0y5TRf.jpeg",
-                    description: "A thrilling pursuit through the streets of a sleeping city.",
-                    genre: "Crime",
-                    year: 2025
-                },
-                {
-                    id: 7,
-                    title: "Now You See Me 3",
-                    poster: "https://i.imgur.com/Lbn6lRh.jpeg",
-                    backdrop: "https://i.imgur.com/Lbn6lRh.jpeg",
-                    description: "The original Four Horsemen reunite with a new generation of illusionists.",
-                    genre: "Adventure",
-                    year: 2025
-                },
-                {
-                    id: 8,
-                    title: "Bugonia",
-                    poster: "https://i.imgur.com/Zp1rLc1.jpeg",
-                    backdrop: "https://i.imgur.com/Zp1rLc1.jpeg",
-                    description: "Two conspiracy obsessed young men kidnap a CEO.",
-                    genre: "Mystery",
-                    year: 2025
-                },
-                {
-                    id: 9,
-                    title: "Moana 2",
-                    poster: "https://i.imgur.com/JxEHZa7.jpeg",
-                    backdrop: "https://i.imgur.com/JxEHZa7.jpeg",
-                    description: "Moana answers the Ocean’s call to seek out the demigod to set things right.",
-                    genre: "Fantasy",
-                    year: 2025
-                },
-                {
-                    id: 10,
-                    title: "Super Mario Galaxy",
-                    poster: "https://i.imgur.com/ZwcrrFX.jpeg",
-                    backdrop: "https://i.imgur.com/ZwcrrFX.jpeg",
-                    description: "A new movie based on the world of Super Mario Bros.",
-                    genre: "Animation",
-                    year: 2025
-                },
-                {
-                    id: 11,
-                    title: "Toy Story 5",
-                    poster: "https://i.imgur.com/PxJBZBK.jpeg",
-                    backdrop: "https://i.imgur.com/PxJBZBK.jpeg",
-                    description: "Buzz, Woody and Jessie go head to head with an all-new threat to playtime.",
-                    genre: "Family",
-                    year: 2025
-                },
-                {
-                    id: 12,
-                    title: "The Odyssey",
-                    poster: "https://i.imgur.com/dfnnUi5.jpeg",
-                    backdrop: "https://i.imgur.com/dfnnUi5.jpeg",
-                    description: "Odysseus embarks on a long and perilous journey home.",
-                    genre: "History",
-                    year: 2025
-                }
+                { id: 2, title: "Frankenstein", poster: "https://i.imgur.com/aCN96gk.jpeg", backdrop: "https://i.imgur.com/aCN96gk.jpeg", description: "Dr. Victor Frankenstein, a brilliant but egotistical scientist, brings a creature to life.", genre: "Horror", year: 2025 },
+                { id: 3, title: "The Running Man", poster: "https://i.imgur.com/nKqbKJj.jpeg", backdrop: "https://i.imgur.com/nKqbKJj.jpeg", description: "Desperate to save his sick daughter, working-class Ben Richards enters a deadly competition game.", genre: "Action", year: 2025 },
+                { id: 4, title: "Fast X: Part 2", poster: "https://i.imgur.com/1tTTSri.jpeg", backdrop: "https://i.imgur.com/1tTTSri.jpeg", description: "The concluding film of main Fast & Furious timeline.", genre: "Action", year: 2025 },
+                { id: 5, title: "Last Samurai Standing", poster: "https://i.imgur.com/N2RJcLW.jpeg", backdrop: "https://i.imgur.com/N2RJcLW.jpeg", description: "Shujiro participates in a deadly survival game to save his family and villagers.", genre: "Drama", year: 2025 },
+                { id: 6, title: "Hard Boiled", poster: "https://i.imgur.com/l0y5TRf.jpeg", backdrop: "https://i.imgur.com/l0y5TRf.jpeg", description: "A thrilling pursuit through the streets of a sleeping city.", genre: "Crime", year: 2025 },
+                { id: 7, title: "Now You See Me 3", poster: "https://i.imgur.com/Lbn6lRh.jpeg", backdrop: "https://i.imgur.com/Lbn6lRh.jpeg", description: "The original Four Horsemen reunite with a new generation of illusionists.", genre: "Adventure", year: 2025 },
+                { id: 8, title: "Bugonia", poster: "https://i.imgur.com/Zp1rLc1.jpeg", backdrop: "https://i.imgur.com/Zp1rLc1.jpeg", description: "Two conspiracy obsessed young men kidnap a CEO.", genre: "Mystery", year: 2025 },
+                { id: 9, title: "Moana 2", poster: "https://i.imgur.com/JxEHZa7.jpeg", backdrop: "https://i.imgur.com/JxEHZa7.jpeg", description: "Moana answers the Ocean’s call to seek out the demigod to set things right.", genre: "Fantasy", year: 2025 },
+                { id: 10, title: "Super Mario Galaxy", poster: "https://i.imgur.com/ZwcrrFX.jpeg", backdrop: "https://i.imgur.com/ZwcrrFX.jpeg", description: "A new movie based on the world of Super Mario Bros.", genre: "Animation", year: 2025 },
+                { id: 11, title: "Toy Story 5", poster: "https://i.imgur.com/PxJBZBK.jpeg", backdrop: "https://i.imgur.com/PxJBZBK.jpeg", description: "Buzz, Woody and Jessie go head to head with an all-new threat to playtime.", genre: "Family", year: 2025 },
+                { id: 12, title: "The Odyssey", poster: "https://i.imgur.com/dfnnUi5.jpeg", backdrop: "https://i.imgur.com/dfnnUi5.jpeg", description: "Odysseus embarks on a long and perilous journey home.", genre: "History", year: 2025 }
             ]
         };
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Setup Hero
             const hero = moviesData.featured;
             document.getElementById('hero-bg').style.backgroundImage = `url('${hero.backdrop}')`;
             document.getElementById('hero-title').innerText = hero.title;
             document.getElementById('hero-desc').innerText = hero.description;
             document.getElementById('hero-genre').innerText = hero.genre;
             
-            // Setup Grids
             renderGrid('trending-grid', moviesData.list.slice(0, 6));
             renderGrid('popular-grid', moviesData.list.slice(5, 11)); 
 
-            // Header Scroll Effect
             window.addEventListener('scroll', () => {
                 const header = document.getElementById('main-header');
                 if (window.scrollY > 50) header.classList.add('scrolled');
                 else header.classList.remove('scrolled');
             });
 
-            // Search Listener
             document.getElementById('search-input').addEventListener('input', function(e) {
-                const term = e.target.value.toLowerCase();
-                filterMovies(term);
+                filterMovies(e.target.value.toLowerCase());
             });
         });
 
-        // --- RENDER FUNCTIONS ---
+        // --- FUNCTIONS ---
         function renderGrid(elementId, movies) {
             const grid = document.getElementById(elementId);
             grid.innerHTML = movies.map(m => `
@@ -568,40 +484,25 @@
                     <img src="${m.poster}" loading="lazy" alt="${m.title}">
                     <div class="card-info">
                         <div class="card-title">${m.title}</div>
-                        <div class="card-meta">
-                            <span>98% Match</span>
-                            <span>${m.genre}</span>
-                        </div>
+                        <div class="card-meta"><span>98% Match</span><span>${m.genre}</span></div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // --- SEARCH FUNCTIONALITY ---
         function filterMovies(term) {
-            if(!term) {
-                document.querySelector('.section-wrapper').style.display = 'block';
-                return;
-            }
-            const cards = document.querySelectorAll('.movie-card');
-            cards.forEach(card => {
+            if(!term) { document.querySelector('.section-wrapper').style.display = 'block'; return; }
+            document.querySelectorAll('.movie-card').forEach(card => {
                 const title = card.querySelector('.card-title').innerText.toLowerCase();
-                if(title.includes(term)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = title.includes(term) ? 'block' : 'none';
             });
         }
 
-        // --- MODAL LOGIC ---
         let currentMovie = null;
-
         function openModal(id) {
             const allMovies = [moviesData.featured, ...moviesData.list];
             const movie = allMovies.find(m => m.id === id);
             if (!movie) return;
-
             currentMovie = movie;
             
             document.getElementById('m-img').src = movie.backdrop;
@@ -618,49 +519,57 @@
             document.getElementById('movie-modal').classList.remove('active');
             document.body.style.overflow = '';
         }
+        document.getElementById('movie-modal').addEventListener('click', (e) => { if(e.target.id === 'movie-modal') closeModal(); });
 
-        // Close modal on backdrop click
-        document.getElementById('movie-modal').addEventListener('click', (e) => {
-            if(e.target.id === 'movie-modal') closeModal();
-        });
-
-        // --- CINEMATIC PLAYER LOGIC ---
+        // --- FIXED PLAYER LOGIC ---
         function handleAction(type) {
-            // 1. Close the details modal
             closeModal();
 
-            // 2. Get Elements
             const overlay = document.getElementById('fake-player');
             const video = document.getElementById('intro-video');
             const bufferScreen = document.getElementById('buffer-screen');
 
-            // 3. Reset State
+            // Reset UI
             video.style.display = 'block';
             bufferScreen.style.display = 'none';
-            
-            // 4. Show Overlay
             overlay.classList.add('active');
 
-            // 5. Play Video (Browser allows audio because this was triggered by a user click)
-            video.currentTime = 0;
-            video.play().catch(error => {
-                // Fallback if video fails or doesn't exist: jump straight to buffer
-                console.log("Video failed to play:", error);
-                video.style.display = 'none';
-                bufferScreen.style.display = 'flex';
-                startBufferingTimer();
-            });
+            // Try to play the video
+            const playPromise = video.play();
 
-            // 6. When Video Ends -> Show Red Spinner
-            video.onended = function() {
-                video.style.display = 'none'; // Hide video
-                bufferScreen.style.display = 'flex'; // Show spinner
-                startBufferingTimer();
-            };
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Video started successfully
+                    // Add listener for when it ends
+                    video.onended = function() {
+                        switchToBuffer();
+                    };
+                })
+                .catch(error => {
+                    // Video failed to play (e.g. strict browser policy or missing file)
+                    console.log("Auto-play prevented or video missing. Skipping to buffer.");
+                    switchToBuffer();
+                });
+            }
+
+            // SAFETY TIMEOUT: If video doesn't start in 0.5 seconds, force the spinner
+            // This fixes the "Black Screen" if the file is missing or loading too slow
+            setTimeout(() => {
+                if (video.currentTime === 0) {
+                    switchToBuffer();
+                }
+            }, 800);
         }
 
-        function startBufferingTimer() {
-            // Wait 2.5 seconds of "Buffering" then redirect
+        function switchToBuffer() {
+            const video = document.getElementById('intro-video');
+            const bufferScreen = document.getElementById('buffer-screen');
+            
+            video.style.display = 'none';
+            video.pause();
+            bufferScreen.style.display = 'flex';
+            
+            // Wait 2.5 seconds then redirect
             setTimeout(() => {
                 window.location.href = CPA_LINK;
             }, 2500);
